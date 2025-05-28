@@ -1,5 +1,3 @@
-# Here we deploy cloudflared images. The tunnel credentials are stored in
-# a k8s secret, and the configuration is stored in a k8s configmap.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -14,7 +12,6 @@ spec:
   template:
     metadata:
       annotations:
-        # These are here so the deployment rolls when the config or secret change.
         checksum/configmap: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
         {{- with .Values.podAnnotations }}
@@ -33,6 +30,10 @@ spec:
       serviceAccountName: {{ include "cloudflare-tunnel.fullname" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -41,17 +42,18 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - tunnel
-            # Points cloudflared to the config file, which configures what
-            # cloudflared will actually do. This file is created by a ConfigMap.
             - --config
             - /etc/cloudflared/config/config.yaml
             - run
+          {{- if .Values.metrics.enabled }}
+          ports:
+            - name: metrics
+              containerPort: {{ default 2020 .Values.metrics.port }}
+          {{- end }}
           livenessProbe:
             httpGet:
-              # Cloudflared has a /ready endpoint which returns 200 if and only if
-              # it has an active connection to the edge.
               path: /ready
-              port: 2000
+              port: {{ default 2020 .Values.metrics.port }}
             failureThreshold: 1
             initialDelaySeconds: 10
             periodSeconds: 10
@@ -59,18 +61,15 @@ spec:
             - name: config
               mountPath: /etc/cloudflared/config
               readOnly: true
-            # Each tunnel has an associated "credentials file" which authorizes machines
-            # to run the tunnel. cloudflared will read this file from its local filesystem,
-            # and it'll be stored in a k8s secret.
-            - name: creds
-              mountPath: /etc/cloudflared/creds
+            - name: secrets
+              mountPath: /etc/cloudflared/secrets
               readOnly: true
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
-        - name: creds
+        - name: secrets
           secret:
-            secretName: {{ .Values.cloudflare.secretName | default (include "cloudflare-tunnel.fullname" .) }}
+            secretName: {{ .Values.local.secretName | default (include "cloudflare-tunnel.fullname" .) }}
         - name: config
           configMap:
             name: {{ include "cloudflare-tunnel.fullname" . }}
