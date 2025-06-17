@@ -45,11 +45,9 @@ spec:
             - --config
             - /etc/cloudflared/config/config.yaml
             - run
-          {{- if .Values.metrics.enabled }}
           ports:
             - name: metrics
               containerPort: {{ default 2020 .Values.metrics.port }}
-          {{- end }}
           livenessProbe:
             httpGet:
               path: /ready

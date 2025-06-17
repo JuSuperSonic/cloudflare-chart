@@ -7,10 +7,8 @@ data:
     no-autoupdate: true
     log-level: {{ default "info" .Values.logLevel }}
     protocol: {{ default "auto" .Values.protocol }}
-    {{- if .Values.metrics.enabled }}
     # Serves the metrics server under /metrics and the readiness server under /ready
     metrics: 0.0.0.0:{{ default "2020" .Values.metrics.port }}
-    {{- end }}
     {{- if eq .Values.configurationSource "remote" }}
     token-file: /etc/cloudflared/secrets/tunnelToken
     {{- else }}
@@ -18,7 +16,7 @@ data:
     tunnel: {{ .Values.local.tunnelName }}
     # The location of the secret containing the tunnel credentials
     credentials-file: /etc/cloudflared/secrets/credentials.json
-    # General purpose TCP routing for the network
+    # Allows Warp clients to access to Kubernetes services.
     warp-routing:
       enabled: {{ .Values.local.enableWarp }}
     # The `ingress` block tells cloudflared which local service to route incoming

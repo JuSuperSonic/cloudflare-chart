@@ -4,9 +4,21 @@
   "properties": {
     "configurationSource": {
       "type": "string",
-      "enum": ["local", "remote"],
+      "enum": [
+        "local",
+        "remote"
+      ],
       "description": "Must be either 'local' or 'remote'."
+    },
+    "protocol": {
+      "type": "string",
+      "enum": [
+        "auto",
+        "http2",
+        "h2mux",
+        "quic"
+      ],
+      "description": "Must be either 'auto', 'http2','h2mux' or 'quic'."
     }
-  },
-  "required": ["configurationSource"]
+  }
 }
