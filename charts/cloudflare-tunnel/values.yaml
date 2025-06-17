@@ -9,7 +9,7 @@ imagePullSecrets: []
 # Configuration tunnel could be local or remote :
 # remote : Configuration is managed on Cloudflare (Dashboard, Iac, Api).
 # local : Configuration is managed in this chart.
-configurationSource: local
+configurationSource: remote
 
 # Cloudflare parameters.
 local:
@@ -101,6 +101,9 @@ podSecurityContext:
   runAsNonRoot: true
   runAsUser: 65532
   fsGroup: 65532
+  sysctls:
+    - name: net.ipv4.ping_group_range
+      value: "65532 65532"
 
 # Security items for one container. We lock it down.
 securityContext:
@@ -134,6 +137,8 @@ hpa:
   targetCPUUtilizationPercentage: 70
   customRules: []
   behavior: {}
+
+priorityClassName: {}
 
 nodeSelector: {}
 
