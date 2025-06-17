@@ -12,18 +12,15 @@ USAGE INSTRUCTIONS
 2. To check logs for the cloudflared pod:
    kubectl logs --selector=app.kubernetes.io/name={{ include "cloudflare-tunnel.name" . }}
 
-CONFIGURATION TIPS:
--------------------
-TALK ABOUT REMOTE/LOCAL
-- You can configure your tunnel credentials by setting the `tunnelToken` or mounting a secret with `credentialsFile`.
-- Customize the ingress rules by modifying the `ingress` section in your values.yaml.
-- Set `metrics.serviceMonitor.enabled=true` to expose Prometheus metrics.
-- Use `resources` to define CPU and memory limits for the cloudflared container.
-
 POST-INSTALLATION NOTES:
 -------------------------
-- Ensure your DNS records in Cloudflare are correctly configured to point to the tunnel : https://dash.cloudflare.com/{{ .Values.local.accountId }}/valkhium.xyz/dns/records
-- Ensure your tunnel health : https://one.dash.cloudflare.com/{{ .Values.local.accountId }}/networks/tunnels
+{{- if (eq .Values.configurationSource "local" ) }}
+- Ensure your DNS records in Cloudflare are correctly configured to point to the tunnel : https://dash.cloudflare.com/{{ .Values.local.accountId }}
+- Ensure your tunnel are correctly configured and that it indicates the status either healthy : https://one.dash.cloudflare.com/{{ .Values.local.accountId }}/networks/tunnels
+{{- else }}
+- Ensure your DNS records in Cloudflare are correctly configured. https://dash.cloudflare.com
+- Ensure your tunnel are correctly configured and that it indicates the status either healthy : https://one.dash.cloudflare.com
+{{- end }}
 
 For more information, visit the official cloudflared documentation:
 https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/

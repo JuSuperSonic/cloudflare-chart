@@ -1,3 +1,4 @@
+{{- if .Values.metrics.serviceMonitor.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -8,8 +9,9 @@ spec:
   type: ClusterIP
   ports:
     - name: metrics
-      port: 2020
-      targetPort: 2020
+      port: {{ default "2020" .Values.metrics.port }}
+      targetPort: {{ default "2020" .Values.metrics.port }}
       protocol: TCP
   selector:
     {{- include "cloudflare-tunnel.selectorLabels" . | nindent 4 }}
+{{- end }}

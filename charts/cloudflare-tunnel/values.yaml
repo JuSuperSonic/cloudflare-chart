@@ -45,6 +45,8 @@ local:
 remote:
   # Cloudflare token.
   tunnelToken: ""
+  # If defined, no secret is created for the token, and instead, the secret referenced is used.
+  secretName: ""
 
 # Log level of Cloudflared.
 logLevel: info
