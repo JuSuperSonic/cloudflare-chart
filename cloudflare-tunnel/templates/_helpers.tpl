@@ -64,7 +64,7 @@ Check configuration about local or remote mode.
     {{- if not .Values.local.tunnelSecret }}
       {{- fail "tunnelSecret must be set when configurationSource is 'local'" }}
     {{- end }}
-{{- else if (eq .Values.configurationSource "remote") -}}
+{{- else if and (eq .Values.configurationSource "remote") (not .Values.remote.secretName) }}
     {{- if not .Values.remote.tunnelToken }}
       {{- fail "tunnelToken must be set when configurationSource is 'remote'" }}
     {{- end }}
@@ -75,9 +75,9 @@ Check configuration about local or remote mode.
 Warning about ingress redirection.
 */}}
 {{- define "cloudflare-tunnel.warning.empty.ingress" -}}
-{{- if hasKey .Values.local "ingress" }}
+{{- if and (eq .Values.configurationSource "local") (hasKey .Values.local "ingress") }}
   {{- if eq (len .Values.local.ingress) 0 }}
-    {{- printf "WARNING: The 'ingress' array is empty : No hostname linked to Kubernetes service or host." | quote }}
+    {{- printf "WARNING: The 'ingress' array is empty : No hostname linked to Kubernetes service or host." }}
   {{- end }}
 {{- end }}
 {{- end }}
