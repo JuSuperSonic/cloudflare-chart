@@ -1,0 +1,39 @@
+{{- if .Values.metrics.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ template "cloudflare-tunnel.fullname" . }}
+  namespace: {{ default .Release.Namespace .Values.metrics.serviceMonitor.namespace | quote }}
+  labels:
+    {{- include "cloudflare-tunnel.labels" . | nindent 4 }}
+    {{- with .Values.metrics.serviceMonitor.additionalLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  jobLabel: {{ template "cloudflare-tunnel.fullname" . }}
+  endpoints:
+  - port: metrics
+    {{- if .Values.metrics.serviceMonitor.interval }}
+    interval: {{ .Values.metrics.serviceMonitor.interval }}
+    {{- end }}
+    {{- if .Values.metrics.serviceMonitor.scrapeTimeout }}
+    scrapeTimeout: {{ .Values.metrics.serviceMonitor.scrapeTimeout }}
+    {{- end }}
+    {{- if .Values.metrics.serviceMonitor.metricRelabelings }}
+    metricRelabelings:
+    {{ toYaml .Values.metrics.serviceMonitor.metricRelabelings | indent 4 }}
+    {{- end }}
+    {{- if .Values.metrics.serviceMonitor.relabelings }}
+    relabelings:
+    {{ toYaml .Values.metrics.serviceMonitor.relabelings | indent 4 }}
+    {{- end }}
+    {{- if .Values.metrics.serviceMonitor.honorLabels }}
+    honorLabels: true
+    {{- end }}
+  selector:
+    matchLabels:
+      {{- include "cloudflare-tunnel.selectorLabels" . | nindent 6 }}
+  namespaceSelector:
+    matchNames:
+    - {{ .Release.Namespace }}
+{{- end }}

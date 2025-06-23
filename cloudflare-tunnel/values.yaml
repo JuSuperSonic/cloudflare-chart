@@ -1,0 +1,150 @@
+# Default values for cloudflare-tunnel.
+# Override partially the name : concat chart name and name override.
+nameOverride: ""
+# Override the name of manifests.
+fullnameOverride: ""
+
+imagePullSecrets: []
+
+# Configuration tunnel could be local or remote :
+# remote : Configuration is managed on Cloudflare (Dashboard, Iac, Api).
+# local : Configuration is managed in this chart.
+configurationSource: remote
+
+# Cloudflare parameters.
+local:
+  # Cloudflare account id.
+  accountId: ""
+  # Name of the tunnel this instance will serve.
+  tunnelName: ""
+  # The Id of the above tunnel.
+  tunnelId: ""
+  # The secret for the tunnel.
+  tunnelSecret: ""
+  # If defined, no secret is created for the credentials, and instead, the secret referenced is used.
+  secretName: ""
+  # If true, turn on WARP routing for TCP.
+  # Allows Warp clients to access to Kubernetes services.
+  enableWarp: false
+  # Define ingress rules for the tunnel. See
+  # https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress
+  # The first rule proxies traffic to the httpbin sample service named web-server at port 80
+  # ingress:
+  #   - hostname: tunnel.example.com
+  #     service: http://web-service:80
+  # This rule sends traffic to the built-in hello-world HTTP server. This can help debug connectivity
+  # issues. If hello.example.com resolves and tunnel.example.com does not, then the problem is
+  # in the connection from cloudflared to your local service, not from the internet to cloudflared.
+  # ingress:
+  #   - hostname: hello.example.com
+  #     service: hello_world
+  ingress: []
+  #
+  enableDefault404: true
+
+remote:
+  # Cloudflare token.
+  tunnelToken: ""
+  # If defined, no secret is created for the token, and instead, the secret referenced is used.
+  secretName: ""
+
+# Log level of Cloudflared.
+logLevel: info
+# Specifies the protocol used to establish a connection between cloudflared and the Cloudflare global network. Available values are auto, http2, h2mux, and quic. (default: auto)
+# https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/install-and-setup/tunnel-guide/local/local-management/arguments/
+protocol: auto
+
+# ref: https://hub.docker.com/r/cloudflare/cloudflared/tags
+image:
+  repository: cloudflare/cloudflared
+  pullPolicy: IfNotPresent
+  tag: 2025.6.1
+
+replicaCount: 1
+
+metrics:
+  port: ""
+  # Creates a Prometheus Operator ServiceMonitor enable metrics is required.
+  serviceMonitor:
+    enabled: false
+    # Namespace where Prometheus is running.
+    namespace: ""
+    # Interval at which endpoints should be scraped by Prometheus.
+    interval: 30s
+    # Add custom labels to the ServiceMonitor resource.
+    additionalLabels: {}
+    # Chooses the metric’s labels on collisions with target labels.
+    honorLabels: false
+    # Additional relabeling of metrics.
+    metricRelabelings: []
+    # General relabeling
+    relabelings: []
+    # Path to scrape metrics
+    path: /metrics
+    # Timeout for scrape metrics request
+    scrapeTimeout: 30s
+
+serviceAccount:
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+  automountServiceAccountToken: false
+
+podAnnotations: {}
+podLabels: {}
+
+# Security items common to everything in the pod.  Here we require that it
+# does not run as the user defined in the image, literally named "nonroot".
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65532
+  fsGroup: 65532
+  sysctls:
+    - name: net.ipv4.ping_group_range
+      value: "65532 65532"
+
+# Security items for one container. We lock it down.
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+
+# Pod topology spread constraints
+topologySpreadConstraints: []
+
+# We usually recommend not to specify default resources and to leave this as a conscious
+# choice for the user. This also increases chances charts run on environments with little
+# resources, such as Minikube.
+# Example :
+#  resources:
+#    limits:
+#      cpu: 100m
+#      memory: 128Mi
+#    requests:
+#      cpu: 100m
+#      memory: 128Mi
+resources: {}
+
+hpa:
+  enabled: false
+  annotations: {}
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70
+  customRules: []
+  behavior: {}
+
+priorityClassName: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+# Default affinity is to spread out over nodes; use this to override.
+affinity: {}
+
+extraDeploy: []

@@ -1,0 +1,29 @@
+Chart Name : {{ .Chart.Name }}
+Chart Version : {{ .Chart.Version }}
+Application Version : {{ .Chart.AppVersion }}
+
+This Helm chart deploys the Cloudflare Tunnel (cloudflared) service into your Kubernetes cluster.
+
+USAGE INSTRUCTIONS
+-------------------
+1. To verify the deployment:
+   kubectl get pods --selector=app.kubernetes.io/name={{ include "cloudflare-tunnel.name" . }}
+
+2. To check logs for the cloudflared pod:
+   kubectl logs --selector=app.kubernetes.io/name={{ include "cloudflare-tunnel.name" . }}
+
+POST-INSTALLATION NOTES:
+-------------------------
+{{- if (eq .Values.configurationSource "local" ) }}
+- Ensure your DNS records in Cloudflare are correctly configured to point to the tunnel : https://dash.cloudflare.com/{{ .Values.local.accountId }}/<my_domain>/dns/records
+- Ensure your tunnel are correctly configured and that it indicates the status either healthy : https://one.dash.cloudflare.com/{{ .Values.local.accountId }}/networks/tunnels
+{{- else }}
+- Ensure your DNS records in Cloudflare are correctly configured to point to the tunnel : https://dash.cloudflare.com/<my_account_id>/<my_domain>/dns/records
+- Ensure your tunnel are correctly configured and that it indicates the status either healthy : https://one.dash.cloudflare.com/<my_account_id>/network/tunnels
+{{- end }}
+
+For more information, visit the official cloudflared documentation:
+https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/
+
+{{ include "cloudflare-tunnel.validateTunnelConfig" . }}
+{{ include "cloudflare-tunnel.warning.empty.ingress" . }}
