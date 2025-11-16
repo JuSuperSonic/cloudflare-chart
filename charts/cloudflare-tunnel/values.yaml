@@ -60,7 +60,6 @@ image:
 replicaCount: 1
 
 metrics:
-  # check with healthcheck if it's ok.
   enabled: false
   port: ""
   # Creates a Prometheus Operator ServiceMonitor enable metrics is required.
