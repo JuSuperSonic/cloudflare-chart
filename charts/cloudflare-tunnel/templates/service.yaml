@@ -9,7 +9,7 @@ spec:
   ports:
     - name: metrics
       port: 2020
-      targetPort: 2020
+      targetPort: metrics
       protocol: TCP
   selector:
     {{- include "cloudflare-tunnel.selectorLabels" . | nindent 4 }}

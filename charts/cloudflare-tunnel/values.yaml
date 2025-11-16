@@ -1,4 +1,3 @@
-# Default values for cloudflare-tunnel.
 # Override partially the name : concat chart name and name override.
 nameOverride: ""
 # Override the name of manifests.
@@ -6,12 +5,12 @@ fullnameOverride: ""
 
 imagePullSecrets: []
 
+## Cloudflare configuration.
 # Configuration tunnel could be local or remote :
 # remote : Configuration is managed on Cloudflare (Dashboard, Iac, Api).
 # local : Configuration is managed in this chart.
 configurationSource: local
 
-# Cloudflare parameters.
 local:
   # Cloudflare account id.
   accountId: ""
@@ -45,21 +44,23 @@ remote:
   # Cloudflare token.
   tunnelToken: ""
 
-# Log level of Cloudflared.
+# Log level of Cloudflared : debug, info (default), warn, error, and fatal.
+# https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/configure-tunnels/cloudflared-parameters/run-parameters/#loglevel
 logLevel: info
 # Specifies the protocol used to establish a connection between cloudflared and the Cloudflare global network. Available values are auto, http2, h2mux, and quic. (default: auto)
 # https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/install-and-setup/tunnel-guide/local/local-management/arguments/
 protocol: auto
 
-# ref: https://hub.docker.com/r/cloudflare/cloudflared/tags
+# Ref: https://hub.docker.com/r/cloudflare/cloudflared/tags
 image:
   repository: cloudflare/cloudflared
   pullPolicy: IfNotPresent
-  tag: 2025.5.0
+  tag: 2025.11.1
 
 replicaCount: 1
 
 metrics:
+  # check with healthcheck if it's ok.
   enabled: false
   port: ""
   # Creates a Prometheus Operator ServiceMonitor enable metrics is required.

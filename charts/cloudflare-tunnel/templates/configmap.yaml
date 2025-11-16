@@ -7,10 +7,8 @@ data:
     no-autoupdate: true
     log-level: {{ default "info" .Values.logLevel }}
     protocol: {{ default "auto" .Values.protocol }}
-    {{- if .Values.metrics.enabled }}
     # Serves the metrics server under /metrics and the readiness server under /ready
     metrics: 0.0.0.0:{{ default "2020" .Values.metrics.port }}
-    {{- end }}
     {{- if eq .Values.configurationSource "remote" }}
     token-file: /etc/cloudflared/secrets/tunnelToken
     {{- else }}
