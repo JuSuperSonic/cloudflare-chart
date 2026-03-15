@@ -19,6 +19,7 @@ local:
   # The Id of the above tunnel.
   tunnelId: ""
   # The secret for the tunnel.
+  # Must be at least 32 bytes and encoded as a base64 string.
   tunnelSecret: ""
   # If defined, no secret is created for the credentials, and instead, the secret referenced is used.
   secretName: ""
