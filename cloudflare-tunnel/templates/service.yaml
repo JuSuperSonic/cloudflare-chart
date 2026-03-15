@@ -9,8 +9,8 @@ spec:
   type: ClusterIP
   ports:
     - name: metrics
-      port: {{ default "2020" .Values.metrics.port }}
-      targetPort: {{ default "2020" .Values.metrics.port }}
+      port: 2020
+      targetPort: metrics
       protocol: TCP
   selector:
     {{- include "cloudflare-tunnel.selectorLabels" . | nindent 4 }}
