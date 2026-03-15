@@ -16,7 +16,7 @@ data:
     tunnel: {{ .Values.local.tunnelName }}
     # The location of the secret containing the tunnel credentials
     credentials-file: /etc/cloudflared/secrets/credentials.json
-    # General purpose TCP routing for the network
+    # Allows Warp clients to access to Kubernetes services.
     warp-routing:
       enabled: {{ .Values.local.enableWarp }}
     # The `ingress` block tells cloudflared which local service to route incoming

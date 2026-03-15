@@ -1,5 +1,5 @@
 {{- if .Values.hpa.enabled  }}
-apiVersion: hpa/v2
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "cloudflare-tunnel.fullname" . }}
@@ -27,6 +27,7 @@ spec:
         name: cpu
         target:
           averageUtilization: {{ .Values.hpa.targetCPUUtilizationPercentage }}
+          type: Utilization
   {{- end }}
   {{- if .Values.hpa.customRules -}}
     {{- toYaml .Values.hpa.customRules | nindent 4}}

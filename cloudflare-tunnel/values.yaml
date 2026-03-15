@@ -9,7 +9,7 @@ imagePullSecrets: []
 # Configuration tunnel could be local or remote :
 # remote : Configuration is managed on Cloudflare (Dashboard, Iac, Api).
 # local : Configuration is managed in this chart.
-configurationSource: local
+configurationSource: remote
 
 local:
   # Cloudflare account id.
@@ -23,6 +23,7 @@ local:
   # If defined, no secret is created for the credentials, and instead, the secret referenced is used.
   secretName: ""
   # If true, turn on WARP routing for TCP.
+  # Allows Warp clients to access to Kubernetes services.
   enableWarp: false
   # Define ingress rules for the tunnel. See
   # https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress
@@ -37,12 +38,14 @@ local:
   #   - hostname: hello.example.com
   #     service: hello_world
   ingress: []
-  # 
+  #
   enableDefault404: true
 
 remote:
   # Cloudflare token.
   tunnelToken: ""
+  # If defined, no secret is created for the token, and instead, the secret referenced is used.
+  secretName: ""
 
 # Log level of Cloudflared : debug, info (default), warn, error, and fatal.
 # https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/configure-tunnels/cloudflared-parameters/run-parameters/#loglevel
@@ -55,12 +58,11 @@ protocol: auto
 image:
   repository: cloudflare/cloudflared
   pullPolicy: IfNotPresent
-  tag: 2025.11.1
+  tag: 2026.3.0
 
 replicaCount: 1
 
 metrics:
-  enabled: false
   port: ""
   # Creates a Prometheus Operator ServiceMonitor enable metrics is required.
   serviceMonitor:
@@ -80,7 +82,7 @@ metrics:
     # Path to scrape metrics
     path: /metrics
     # Timeout for scrape metrics request
-    scrapeTimeout: 10s
+    scrapeTimeout: 30s
 
 serviceAccount:
   # Annotations to add to the service account
@@ -98,6 +100,10 @@ podLabels: {}
 podSecurityContext:
   runAsNonRoot: true
   runAsUser: 65532
+  fsGroup: 65532
+  sysctls:
+    - name: net.ipv4.ping_group_range
+      value: "65532 65532"
 
 # Security items for one container. We lock it down.
 securityContext:
@@ -112,7 +118,7 @@ topologySpreadConstraints: []
 
 # We usually recommend not to specify default resources and to leave this as a conscious
 # choice for the user. This also increases chances charts run on environments with little
-# resources, such as Minikube. 
+# resources, such as Minikube.
 # Example :
 #  resources:
 #    limits:
@@ -131,6 +137,8 @@ hpa:
   targetCPUUtilizationPercentage: 70
   customRules: []
   behavior: {}
+
+priorityClassName: {}
 
 nodeSelector: {}
 
